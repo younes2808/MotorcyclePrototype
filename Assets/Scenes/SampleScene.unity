@@ -693,6 +693,7 @@ MonoBehaviour:
   restLength: 0.35
   springTravel: 0.25
   tireRadius: 0.3
+  driveForce: 1500
 --- !u!1001 &3429670938773749632
 PrefabInstance:
   m_ObjectHideFlags: 0

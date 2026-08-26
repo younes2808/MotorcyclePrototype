@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MotoController : MonoBehaviour
 {
@@ -14,6 +15,10 @@ public class MotoController : MonoBehaviour
     [SerializeField] private float springTravel;
     [SerializeField] private float tireRadius;
 
+    [Header("Acceleration")]
+    [SerializeField] private float driveForce;
+    private float inputForce;
+
     void Start()
     {
         if (bikeRigidbody == null)
@@ -23,17 +28,25 @@ public class MotoController : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (Keyboard.current.wKey.isPressed) inputForce = 1;
+        else if (Keyboard.current.sKey.isPressed) inputForce = -1;
+        else inputForce = 0;
+
+    }
+
     private void FixedUpdate()
     {
-        foreach (Transform wheelTransform in wheelPoint)
+        for (int i = 0; i < wheelPoint.Length; i++)
         {
             float maxLength = restLength + springTravel;
 
-            if (Physics.Raycast(wheelTransform.position, -wheelTransform.up, out RaycastHit hit, maxLength + tireRadius, drivableLayer))
+            if (Physics.Raycast(wheelPoint[i].position, -wheelPoint[i].up, out RaycastHit hit, maxLength + tireRadius, drivableLayer))
             {
-                Vector3 springDir = wheelTransform.up;
+                Vector3 springDir = wheelPoint[i].up;
 
-                Vector3 tireWorldVel = bikeRigidbody.GetPointVelocity(wheelTransform.position);
+                Vector3 tireWorldVel = bikeRigidbody.GetPointVelocity(wheelPoint[i].position);
 
                 // Calculate offset from the raycast
                 float offset = restLength - (hit.distance - tireRadius);
@@ -44,13 +57,18 @@ public class MotoController : MonoBehaviour
 
                 float force = (offset * springStiffness) - (vel * damperStiffness);
 
-                bikeRigidbody.AddForceAtPosition(springDir * force, wheelTransform.position);
+                bikeRigidbody.AddForceAtPosition(springDir * force, wheelPoint[i].position);
+                // REAR WHEEL
+                if (i == 1)
+                {
+                    bikeRigidbody.AddForceAtPosition(wheelPoint[i].forward * driveForce * inputForce, wheelPoint[i].position);
+                }
 
-                Debug.DrawLine(wheelTransform.position, hit.point, Color.red);
+                Debug.DrawLine(wheelPoint[i].position, hit.point, Color.red);
             }
             else
             {
-                Debug.DrawRay(wheelTransform.position, -wheelTransform.up * (tireRadius + maxLength), Color.green);
+                Debug.DrawRay(wheelPoint[i].position, -wheelPoint[i].up * (tireRadius + maxLength), Color.green);
             }
         }
     }
