@@ -54,4 +54,19 @@ public class MotoController : MonoBehaviour
             }
         }
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (bikeRigidbody == null) return;
+
+        Vector3 com = bikeRigidbody.worldCenterOfMass;
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawSphere(com, 0.05f);
+
+        // Optional: crosshair lines so it's visible at any zoom
+        Gizmos.DrawLine(com - transform.right * 0.3f, com + transform.right * 0.3f);
+        Gizmos.DrawLine(com - transform.up * 0.3f, com + transform.up * 0.3f);
+        Gizmos.DrawLine(com - transform.forward * 0.3f, com + transform.forward * 0.3f);
+    }
 }
