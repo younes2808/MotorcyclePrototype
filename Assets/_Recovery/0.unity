@@ -728,7 +728,7 @@ MonoBehaviour:
   tireRadius: 0.3
   driveForce: 1500
   leanForce: 15
-  frictionForce: 1.2
+  frictionForce: 3
 --- !u!1 &1334810271
 GameObject:
   m_ObjectHideFlags: 0

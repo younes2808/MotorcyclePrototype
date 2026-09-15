@@ -19,6 +19,13 @@ public class MotoController : MonoBehaviour
     [SerializeField] private float driveForce;
     private float inputForce;
 
+    [Header("Leaning")]
+    [SerializeField] private float leanForce;
+    private float leanInputForce;
+
+    [Header("Friction")]
+    [SerializeField] private float frictionForce = 1.2f;
+
     void Start()
     {
         if (bikeRigidbody == null)
@@ -30,20 +37,32 @@ public class MotoController : MonoBehaviour
 
     private void Update()
     {
+        // Driving of car
         if (Keyboard.current.wKey.isPressed) inputForce = 1;
         else if (Keyboard.current.sKey.isPressed) inputForce = -1;
         else inputForce = 0;
+
+        // Lean of car
+        if (Keyboard.current.aKey.isPressed) leanInputForce = -1;
+        else if (Keyboard.current.dKey.isPressed) leanInputForce = 1;
+        else leanInputForce = 0;
 
     }
 
     private void FixedUpdate()
     {
+
+        bool grounded = false;
+
         for (int i = 0; i < wheelPoint.Length; i++)
         {
             float maxLength = restLength + springTravel;
 
             if (Physics.Raycast(wheelPoint[i].position, -wheelPoint[i].up, out RaycastHit hit, maxLength + tireRadius, drivableLayer))
             {
+                //ground check
+                grounded = true;
+
                 Vector3 springDir = wheelPoint[i].up;
 
                 Vector3 tireWorldVel = bikeRigidbody.GetPointVelocity(wheelPoint[i].position);
@@ -71,6 +90,11 @@ public class MotoController : MonoBehaviour
                 Debug.DrawRay(wheelPoint[i].position, -wheelPoint[i].up * (tireRadius + maxLength), Color.green);
             }
         }
+
+        bikeRigidbody.linearDamping = (grounded && inputForce == 0) ? frictionForce : 0f;
+        // leaning should work on the ground aswell as in the air so the ground check is not needed
+        // add torque works from the COM of the bike
+        bikeRigidbody.AddRelativeTorque(Vector3.right * leanForce * leanInputForce, ForceMode.Acceleration);
     }
 
     private void OnDrawGizmosSelected()
